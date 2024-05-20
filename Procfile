@@ -1,1 +1,1 @@
-unicorn app.main:app --port=5000
+web: unicorn app.main:app --port=5000
