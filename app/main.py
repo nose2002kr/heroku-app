@@ -8,7 +8,7 @@ import secrets
 import jwt
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import BaseModel
-
+import os
 from datetime import datetime, timedelta
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -20,8 +20,6 @@ app = FastAPI()
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env")
-    username : str
-    password : str
 settings = Settings()
 
 api_key_header = APIKeyHeader(name="Token")
@@ -56,23 +54,24 @@ def create_access_token(data: dict, expires_delta: timedelta):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
     return encoded_jwt
 
-def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
-    correct_username = secrets.compare_digest(credentials.username, settings.username)
-    correct_password = secrets.compare_digest(credentials.password, settings.password)
+#def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
+def get_current_username(username: str, password: str):
+    correct_username = secrets.compare_digest(username, os.environ["ENV_USERNAME"])
+    correct_password = secrets.compare_digest(password, os.environ["ENV_PASSWORD"])
     if not (correct_username and correct_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Basic"},
+            detail="Incorrect username or password"
         )
-    return credentials.username
+    return True
 
 
 # Route for authentication and access token generation
-@app.get("/api/login", response_model=Token, dependencies=[Depends(get_current_username)])
-async def login_for_access_token(credentials: HTTPBasicCredentials = Depends(security)):
+@app.post("/api/login", response_model=Token)
+#@app.post("/api/login", response_model=Token)
+async def login_for_access_token(username: str, password: str, credentials = Depends(get_current_username)):
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": credentials.username}, expires_delta=access_token_expires)
+    access_token = create_access_token(data={"sub": username}, expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "Bearer"}
 
 #app.include_router(router=user_router)
