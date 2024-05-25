@@ -13,7 +13,7 @@ app = FastAPI()
 
 origins = [
     "http://localhost:3000",
-    "https://nose2002kr.github.io/",
+    "https://nose2002kr.github.io",
 ]
 app.add_middleware(
     CORSMiddleware,
