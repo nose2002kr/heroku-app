@@ -1,7 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import os
 
-is_production = False
+is_production = os.environ['ENVIRONMENT'] == 'production'
 
 class Settings(BaseSettings):
     username : str
