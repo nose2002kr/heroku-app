@@ -14,9 +14,9 @@ class Settings(BaseSettings):
     if is_production:
         username = os.environ['ENV_USERNAME']
         password = os.environ['ENV_PASSWORD']
-        redis_host = os.environ['REDISCLOUD_URL']
-        redis_port = os.environ['REDISCLOUD_URL']
-        redis_pwd = os.environ['REDISCLOUD_URL']
+        redis_host = os.environ['REDISCLOUD_HOST']
+        redis_port = os.environ['REDISCLOUD_PORT']
+        redis_pwd = os.environ['REDISCLOUD_PWD']
     else:
         model_config = SettingsConfigDict(env_file='.env')
          
