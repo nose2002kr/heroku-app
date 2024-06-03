@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-class ServersInfo(BaseModel):
+class ServerInfo(BaseModel):
     server_name: str
     survival_check: str
 
