@@ -20,6 +20,7 @@ async def get_video_infos():
                    responses=OK_RESULT_RESPONSE_EXAMPLE)
 async def add_video_info(info: VideoInfo):
     VideoInfoDataControl.add_video_info(info)
+    return JSONResponse(OK_RESULT)
 
 @video_router.delete("/", response_model=None, dependencies=[Depends(get_current_user)], 
                      responses=OK_RESULT_RESPONSE_EXAMPLE)

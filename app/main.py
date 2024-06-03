@@ -8,6 +8,8 @@ sys.path.append(current_dir)
 
 from route.login import login_router
 from route.video import video_router
+from route.servers import servers_router
+from route.server import server_router
 
 app = FastAPI()
 
@@ -25,3 +27,5 @@ app.add_middleware(
 
 app.include_router(router=login_router)
 app.include_router(router=video_router)
+app.include_router(router=server_router)
+app.include_router(router=servers_router)
