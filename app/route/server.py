@@ -1,7 +1,7 @@
 from fastapi import APIRouter,       \
                     WebSocket,       \
                     WebSocketDisconnect,\
-                    BackgroundTasks
+                    HTTPException
 from route.login import get_current_user
 from types import SimpleNamespace
 from data_control import ServerCommandInfoDataControl
@@ -23,7 +23,7 @@ async def run_to_server(websocket: WebSocket, server_name: str):
         payload = await get_current_user(SimpleNamespace(credentials=token))
         #print('payload: ' + payload)
         if not payload:
-            await websocket.close(code=1008)
+            await websocket.close(code=1003)
             return
 
 
@@ -47,6 +47,11 @@ async def run_to_server(websocket: WebSocket, server_name: str):
     except WebSocketDisconnect:
         print("Client disconnected")
         await websocket.close()
+    except HTTPException as e:
+        print(f"HTTP error: {e}")
+        if (e.status_code == 401):
+            await websocket.close(code=1003)
+        await websocket.close(code=1008)
     except Exception as e:
         print(f"Unexpected error: {e}")
         await websocket.close(code=1008)

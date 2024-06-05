@@ -4,6 +4,7 @@ from shlex import split
 import sys
 
 import asyncio
+from asyncio.streams import StreamReader
 
 async def request_to_proceed_commend_on_cli(
         command_line: str,
@@ -33,8 +34,8 @@ async def request_to_proceed_commend_on_cli(
                     except FileNotFoundError:
                         #print('failed with ' + ext)
                         pass
-    
-        async def read_output(pipe, prefix):
+        
+        async def read_output(pipe: StreamReader, prefix: str):
             """
             Read lines from a pipe and call the callback function with each line.
 
@@ -45,12 +46,11 @@ async def request_to_proceed_commend_on_cli(
                 buf = await pipe.readline()
                 if not buf:
                     break
-                #print(buf)
-                await progressFn(str(buf, 'utf-8'))
+                await progressFn(str(buf, 'utf-8').strip())
 
         await asyncio.gather(
-            read_output(process.stderr,'1'),
-            read_output(process.stdout,'2'))
+            read_output(process.stderr,'stdout'),
+            read_output(process.stdout,'stderr'))
 
     except Exception as e:
         await progressFn(e.__str__())

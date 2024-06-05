@@ -36,6 +36,7 @@ class ServerInfoDataControl:
     def remove_server_info(info: ServerInfo):
         __redis__.srem('server_info', info.model_dump_json())
 
+
 class ServerCommandInfoDataControl:
     def get_server_command_info(server_name: str) -> ServerCommandInfo:
         raw = __redis__.get(f'server_command_info:{server_name}')
