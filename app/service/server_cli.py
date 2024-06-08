@@ -8,8 +8,8 @@ from asyncio.streams import StreamReader
 
 async def request_to_proceed_commend_on_cli(
         command_line: str,
-        progressFn: Callable[[str], None],
-        wrapUpFn: Callable[[], None]):
+        progressFn: Callable[[str], None] = None,
+        wrapUpFn: Callable[[], None] = None):
     
     try:
         args = split(command_line)
@@ -34,6 +34,8 @@ async def request_to_proceed_commend_on_cli(
                     except FileNotFoundError:
                         #print('failed with ' + ext)
                         pass
+        if process == None:
+            raise BaseException('failed to create subprocess')
         
         async def read_output(pipe: StreamReader, prefix: str):
             """
@@ -46,16 +48,17 @@ async def request_to_proceed_commend_on_cli(
                 buf = await pipe.readline()
                 if not buf:
                     break
-                await progressFn(str(buf, 'utf-8').strip())
+                if progressFn: await progressFn(str(buf, 'utf-8').strip())
 
         await asyncio.gather(
             read_output(process.stderr,'stdout'),
             read_output(process.stdout,'stderr'))
 
     except Exception as e:
-        await progressFn(e.__str__())
-        await wrapUpFn(1008)
+        print(e)
+        if progressFn: await progressFn(e.__str__())
+        if wrapUpFn: await wrapUpFn(1008)
         return
         #print(e)
     
-    await wrapUpFn()
+    if wrapUpFn: await wrapUpFn()

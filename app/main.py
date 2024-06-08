@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
 
 import sys
 import os
@@ -11,7 +12,18 @@ from route.video import video_router
 from route.servers import servers_router
 from route.server import server_router
 
-app = FastAPI()
+from service.service_message_consumer import ServiceMessageConsumer
+from config import Config
+
+import asyncio
+
+@asynccontextmanager
+async def startup_event(app: FastAPI):
+    asyncio.create_task(ServiceMessageConsumer.consume(Config.kafka_host))
+    yield
+
+
+app = FastAPI(lifespan=startup_event)
 
 origins = [
     "http://localhost:3000",

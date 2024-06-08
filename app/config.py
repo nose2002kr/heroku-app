@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     redis_host: str
     redis_port: str
     redis_pwd: str
+    kafka_host: str
 
     model_config = None
     if is_production:
@@ -21,6 +22,7 @@ class Settings(BaseSettings):
         redis_host = os.environ['REDISCLOUD_HOST']
         redis_port = os.environ['REDISCLOUD_PORT']
         redis_pwd = os.environ['REDISCLOUD_PWD']
+        kafka_host = os.environ['KAFKA_HOST']
     else:
         model_config = SettingsConfigDict(env_file='.env')
          

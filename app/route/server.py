@@ -1,14 +1,17 @@
 from fastapi import APIRouter,       \
                     WebSocket,       \
                     WebSocketDisconnect,\
-                    HTTPException
+                    HTTPException,   \
+                    Depends
 from route.login import get_current_user
 from types import SimpleNamespace
 from data_control import ServerCommandInfoDataControl
 from server_command_info import Protocol
 from service.server_cli import request_to_proceed_commend_on_cli
+from service.service_message_producer import ServiceMessageProducer
 
-import asyncio
+from config import Config
+
 server_router = APIRouter(prefix='/api/server')
 OK_RESULT = {"message": "OK"}
 OK_RESULT_RESPONSE_EXAMPLE = {200:{"content":
@@ -55,3 +58,15 @@ async def run_to_server(websocket: WebSocket, server_name: str):
     except Exception as e:
         print(f"Unexpected error: {e}")
         await websocket.close(code=1008)
+
+
+@server_router.post("/{server_name}/turn_off", response_model=None, dependencies=[Depends(get_current_user)])
+async def turn_off_server(server_name: str):
+    ServiceMessageProducer(Config.kafka_host).send(f"{server_name}:turn_off")
+    return OK_RESULT
+
+
+@server_router.post("/{server_name}/turn_on", response_model=None, dependencies=[Depends(get_current_user)])
+async def turn_on_server(server_name: str):
+    ServiceMessageProducer(Config.kafka_host).send(f"{server_name}:turn_on")
+    return OK_RESULT
