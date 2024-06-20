@@ -5,7 +5,7 @@ from fastapi import APIRouter,       \
                     Depends
 from route.login import get_current_user
 from types import SimpleNamespace
-from data_control import ServerCommandInfoDataControl
+from data_control import ServerCommandInfoDataControl, ServerPowerStatusInfoDataControl
 from server_command_info import Protocol
 from service.server_cli import request_to_proceed_commend_on_cli
 from service.service_message_producer import ServiceMessageProducer
@@ -62,14 +62,20 @@ async def run_to_server(websocket: WebSocket, server_name: str):
         logger.exception('Unexpected error', e)
         await websocket.close(code=1008)
 
-
 @server_router.post("/{server_name}/turn_off", response_model=None)
 async def turn_off_server(server_name: str):
-    ServiceMessageProducer(Config.kafka_host).send(f"{server_name}:turn_off")
+    await ServiceMessageProducer().send(f"{server_name}:turn_off")
     return OK_RESULT
-
 
 @server_router.post("/{server_name}/turn_on", response_model=None, dependencies=[Depends(get_current_user)])
 async def turn_on_server(server_name: str):
-    ServiceMessageProducer(Config.kafka_host).send(f"{server_name}:turn_on")
+    await ServiceMessageProducer().send(f"{server_name}:turn_on")
     return OK_RESULT
+
+@server_router.get("/{server_name}/status", response_model=None, dependencies=[Depends(get_current_user)])
+async def status_power_of_the_server(server_name: str):
+    server_status = ServerPowerStatusInfoDataControl.get_server_power_status_info(server_name)
+    return {
+        "server_name": server_status.server_name,
+        "power_status": server_status.power_status.name
+    }

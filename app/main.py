@@ -19,7 +19,7 @@ import asyncio
 
 @asynccontextmanager
 async def startup_event(app: FastAPI):
-    asyncio.create_task(ServiceMessageConsumer.consume(Config.kafka_host))
+    asyncio.create_task(ServiceMessageConsumer().consume())
     yield
 
 

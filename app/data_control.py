@@ -4,6 +4,7 @@ from config import Config
 from video_info import VideoInfo
 from server_info import ServerInfo
 from server_command_info import ServerCommandInfo
+from server_power_status_info import ServerPowerStatusInfo
 
 __redis__ = redis.Redis(host=Config.redis_host, port=Config.redis_port, password=Config.redis_pwd)
 
@@ -36,15 +37,24 @@ class ServerInfoDataControl:
     def remove_server_info(info: ServerInfo):
         __redis__.srem('server_info', info.model_dump_json())
 
-
 class ServerCommandInfoDataControl:
     def get_server_command_info(server_name: str) -> ServerCommandInfo:
         raw = __redis__.get(f'server_command_info:{server_name}')
         return ServerCommandInfo.model_validate_json(raw)
 
-    def add_server_command_info(server_name: str, info: ServerCommandInfo):
+    def set_server_command_info(server_name: str, info: ServerCommandInfo):
         __redis__.set(f'server_command_info:{server_name}', info.model_dump_json())
         
     def remove_server_info(server_name: str):
         __redis__.delete(f'server_command_info:{server_name}')
         
+class ServerPowerStatusInfoDataControl:
+    def get_server_power_status_info(server_name: str) -> ServerPowerStatusInfo:
+        raw = __redis__.get(f'server_power_status_info:{server_name}')
+        return ServerPowerStatusInfo.model_validate_json(raw)
+
+    def set_server_power_status_info(server_name: str, info: ServerPowerStatusInfo):
+        __redis__.set(f'server_power_status_info:{server_name}', info.model_dump_json())
+        
+    def remove_server_info(server_name: str):
+        __redis__.delete(f'server_power_status_info:{server_name}')
