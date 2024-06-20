@@ -5,6 +5,7 @@ import sys
 
 import asyncio
 from asyncio.streams import StreamReader
+from loguru import logger
 
 async def request_to_proceed_commend_on_cli(
         command_line: str,
@@ -16,7 +17,7 @@ async def request_to_proceed_commend_on_cli(
         if len(args) <= 0:
             raise 'argument is too few.'
         
-        #print(f'request_to_proceed_commend_on_cli; {split(command_line)}')
+        logger.debug(f'request_to_proceed_commend_on_cli; {split(command_line)}')
 
         process: subprocess.Popen = None
         try:
@@ -29,10 +30,10 @@ async def request_to_proceed_commend_on_cli(
                     fixed_args[0] = fixed_args[0] + ext
                     try:
                         process = await asyncio.create_subprocess_exec(*fixed_args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                        #print('fixed by ' + fixed_args.__str__())
+                        logger.debug('fixed by ' + fixed_args.__str__())
                         break
                     except FileNotFoundError:
-                        #print('failed with ' + ext)
+                        logger.debug('failed with ' + ext)
                         pass
         if process == None:
             raise BaseException('failed to create subprocess')
@@ -55,10 +56,9 @@ async def request_to_proceed_commend_on_cli(
             read_output(process.stdout,'stderr'))
 
     except Exception as e:
-        print(e)
+        logger.exception('Error occurred')
         if progressFn: await progressFn(e.__str__())
         if wrapUpFn: await wrapUpFn(1008)
         return
-        #print(e)
     
     if wrapUpFn: await wrapUpFn()

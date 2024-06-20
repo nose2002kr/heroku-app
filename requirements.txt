@@ -7,3 +7,4 @@ pydantic-settings==2.2.1
 redis==5.0.4
 kafka-python==2.0.2
 aiokafka==0.10.0
+loguru==0.7.2

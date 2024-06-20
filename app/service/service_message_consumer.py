@@ -10,6 +10,7 @@ class ServiceMessageConsumer:
         
         # Get cluster layout and join group `my-group`
         await consumer.start()
+        print('consumer started')
         try:
             # Consume messages
             async for raw_msg in consumer:
