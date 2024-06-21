@@ -16,7 +16,6 @@ from service.service_message_consumer import ServiceMessageConsumer
 from config import Config
 
 import asyncio
-import install_heroku # just import it
 
 @asynccontextmanager
 async def startup_event(app: FastAPI):
