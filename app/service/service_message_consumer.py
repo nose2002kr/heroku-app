@@ -29,7 +29,7 @@ class ServiceMessageConsumer(KafkaMessageConsumer):
                     info = ServerCommandInfoDataControl.get_server_command_info(server)
                     servers = ServerInfoDataControl.take_server_infos()
                     for server_info in servers:
-                        if server_info.server_name == server:
+                        if server_info.server_name != server:
                             continue
                         logger.debug(f'check if server is alive, before switching power status: {server_info.server_name}')
                         res = requests.get(server_info.survival_check)
