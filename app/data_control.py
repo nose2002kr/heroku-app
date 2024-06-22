@@ -75,7 +75,16 @@ class RedisDataControl(Generic[T], metaclass=Singleton):
         __redis__.zadd(self.key, {name: max + 1}, nx=True)
         __redis__.set(key_name, info.model_dump_json())
         logger.debug(f'set to ({max}): {key_name}')
+    
+    def set(self, name: str, info: T):
+        key_name = self.__get_name(name)
         
+        if not __redis__.exists(key_name):
+            logger.debug(f'the "{key_name}" not exists, add.')
+            self.add(name, info)
+        else:
+            __redis__.set(key_name, info.model_dump_json())
+
     def remove(self, name: str):
         __redis__.zrem(self.key, name)
         __redis__.delete(self.__get_name(name))

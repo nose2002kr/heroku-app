@@ -12,7 +12,7 @@ OK_RESULT_RESPONSE_EXAMPLE = {200:{"content":
                                {"application/json":{"example":OK_RESULT}}
                              }}
 
-@servers_router.get("/", response_model=set[ServerInfo])
+@servers_router.get("/", response_model=list[ServerInfo])
 async def get_servers_info():
     return ServerInfoDataControl().take_all()
 

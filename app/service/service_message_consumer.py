@@ -5,7 +5,8 @@ from loguru import logger
 from service.kafka_interface.kafka_message_consumer import KafkaMessageConsumer
 from data_control import ServerPowerStatusInfoDataControl
 from app.core.data_control.model.server_power_status_info import ServerPowerStatusInfo, PowerStatus
-import requests
+
+import aiohttp
 
 class ServiceMessageConsumer(KafkaMessageConsumer):
     def __init__(self):
@@ -29,16 +30,18 @@ class ServiceMessageConsumer(KafkaMessageConsumer):
                     server_info = ServerInfoDataControl().take(server)
 
                     logger.debug(f'check if server is alive, before switching power status: {server_info.server_name}')
-                    res = requests.get(server_info.survival_check)
-                    if res.status_code == 200:
-                        logger.debug(f'{server_info.server_name} is alive')
-                        ServerPowerStatusInfoDataControl().add(server,
-                                    ServerPowerStatusInfo(server_name=server, power_status=PowerStatus.STARTED))
-                        
-                    else:
-                        logger.debug(f'{server_info.server_name} is dead')
-                        ServerPowerStatusInfoDataControl().add(server, 
-                                    ServerPowerStatusInfo(server_name=server, power_status=PowerStatus.STOPPED))
+                    
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(server_info.survival_check) as response:
+                            if response.status == 200:
+                                logger.debug(f'{server_info.server_name} is alive')
+                                ServerPowerStatusInfoDataControl().set(server,
+                                            ServerPowerStatusInfo(server_name=server, power_status=PowerStatus.STARTED))
+                                
+                            else:
+                                logger.debug(f'{server_info.server_name} is dead')
+                                ServerPowerStatusInfoDataControl().set(server, 
+                                            ServerPowerStatusInfo(server_name=server, power_status=PowerStatus.STOPPED))
 
                     if info.protocol.value == Protocol.CLI.value:
                         switch_command: str = ''
@@ -60,7 +63,7 @@ class ServiceMessageConsumer(KafkaMessageConsumer):
                             continue
                         
                         prev_status = ServerPowerStatusInfoDataControl().take(server)
-                        ServerPowerStatusInfoDataControl().add(server,
+                        ServerPowerStatusInfoDataControl().set(server,
                                     ServerPowerStatusInfo(server_name=server, power_status=progressive))
                         try:
                             await request_to_proceed_commend_on_cli( 
@@ -69,9 +72,9 @@ class ServiceMessageConsumer(KafkaMessageConsumer):
                                             wrapUpFn=None)
                         except:
                             logger.exception('error occurred while executing command')
-                            ServerPowerStatusInfoDataControl().add(server, prev_status)
+                            ServerPowerStatusInfoDataControl().set(server, prev_status)
                             
-                        ServerPowerStatusInfoDataControl().add(server, 
+                        ServerPowerStatusInfoDataControl().set(server, 
                                     ServerPowerStatusInfo(server_name=server, power_status=perfect))
                         logger.debug(sentence)
                     else:

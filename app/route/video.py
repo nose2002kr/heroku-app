@@ -12,7 +12,7 @@ OK_RESULT_RESPONSE_EXAMPLE = {200:{"content":
                                {"application/json":{"example":OK_RESULT}}
                              }}
 
-@video_router.get("/", response_model=set[VideoInfo])
+@video_router.get("/", response_model=list[VideoInfo])
 async def get_video_infos():
     return VideoInfoDataControl().take_all()
 
