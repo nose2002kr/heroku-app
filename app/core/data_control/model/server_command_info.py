@@ -1,11 +1,11 @@
-from pydantic import BaseModel
+from core.data_control.model.model import Model
 from enum import Enum
 
 class Protocol(Enum):
     CLI = 0
     HTTP = 1
 
-class ServerCommandInfo(BaseModel):
+class ServerCommandInfo(Model):
     server_name: str
     protocol: Protocol
     path_of_run: str
@@ -23,3 +23,5 @@ class ServerCommandInfo(BaseModel):
             self.path_of_log,
         ))
     
+    def get_name():
+        return 'server_command_info_2'

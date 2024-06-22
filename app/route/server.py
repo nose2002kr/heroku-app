@@ -31,7 +31,7 @@ async def run_to_server(websocket: WebSocket, server_name: str):
             return
 
 
-        info = ServerCommandInfoDataControl.get_server_command_info(server_name)
+        info = ServerCommandInfoDataControl().take(server_name)
         logger.debug(f'server info by{server_name}: {info}')
 
         async def send_progress(output: str) -> None:
@@ -44,11 +44,14 @@ async def run_to_server(websocket: WebSocket, server_name: str):
         
         data = await websocket.receive_text()
         logger.debug(f'received data: {data}')
-        if (info.protocol == Protocol.CLI):
+        if (info.protocol.value == Protocol.CLI.value):
             await request_to_proceed_commend_on_cli( 
                                 command_line=(info.path_of_run +  ' ' + data),
                                 progressFn=send_progress,
                                 wrapUpFn=wrap_up)
+        else:
+            logger.error(f'protocol {info.protocol} is not supported')
+            await websocket.close(code=1008)
 
     except WebSocketDisconnect:
         logger.error('Client disconnected')
@@ -74,7 +77,7 @@ async def turn_on_server(server_name: str):
 
 @server_router.get("/{server_name}/status", response_model=None, dependencies=[Depends(get_current_user)])
 async def status_power_of_the_server(server_name: str):
-    server_status = ServerPowerStatusInfoDataControl.get_server_power_status_info(server_name)
+    server_status = ServerPowerStatusInfoDataControl().take(server_name)
     return {
         "server_name": server_status.server_name,
         "power_status": server_status.power_status.name

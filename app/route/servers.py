@@ -14,16 +14,16 @@ OK_RESULT_RESPONSE_EXAMPLE = {200:{"content":
 
 @servers_router.get("/", response_model=set[ServerInfo])
 async def get_servers_info():
-    return ServerInfoDataControl().get_names()
+    return ServerInfoDataControl().take_all()
 
 @servers_router.post("/", response_model=None, dependencies=[Depends(get_current_user)],
                    responses=OK_RESULT_RESPONSE_EXAMPLE)
 async def add_servers_info(info: ServerInfo):
-    ServerInfoDataControl().add(info)
+    ServerInfoDataControl().add(info.server_name, info)
     return JSONResponse(OK_RESULT)
 
 @servers_router.delete("/", response_model=None, dependencies=[Depends(get_current_user)], 
                      responses=OK_RESULT_RESPONSE_EXAMPLE)
 async def delete_servers_info(info: ServerInfo):
-    ServerInfoDataControl().remove(info)
+    ServerInfoDataControl().remove(info.server_name)
     return JSONResponse(OK_RESULT)

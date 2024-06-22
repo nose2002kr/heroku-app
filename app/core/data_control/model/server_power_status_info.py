@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from core.data_control.model.model import Model
 from enum import Enum
 
 class PowerStatus(Enum):
@@ -7,7 +7,7 @@ class PowerStatus(Enum):
     STOPPING = 2
     STOPPED  = 3
 
-class ServerPowerStatusInfo(BaseModel):
+class ServerPowerStatusInfo(Model):
     server_name: str
     power_status: PowerStatus
 
@@ -17,3 +17,5 @@ class ServerPowerStatusInfo(BaseModel):
             self.power_status
         ))
     
+    def get_name():
+        return 'server_power_status_info_2'

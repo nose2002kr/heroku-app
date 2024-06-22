@@ -25,25 +25,22 @@ class ServiceMessageConsumer(KafkaMessageConsumer):
                     server,command = msg.split(':')
                     logger.debug(f"consumed: {server} {command}")
 
-                    info = ServerCommandInfoDataControl.get_server_command_info(server)
-                    servers = ServerInfoDataControl().take_datas()
-                    for server_info in servers:
-                        if server_info.server_name != server:
-                            continue
-                        logger.debug(f'check if server is alive, before switching power status: {server_info.server_name}')
-                        res = requests.get(server_info.survival_check)
-                        if res.status_code == 200:
-                            logger.debug(f'{server_info.server_name} is alive')
-                            ServerPowerStatusInfoDataControl.set_server_power_status_info(server, 
-                                        ServerPowerStatusInfo(server_name=server, power_status=PowerStatus.STARTED))
-                            
-                        else:
-                            logger.debug(f'{server_info.server_name} is dead')
-                            ServerPowerStatusInfoDataControl.set_server_power_status_info(server, 
-                                        ServerPowerStatusInfo(server_name=server, power_status=PowerStatus.STOPPED))
-                        break
+                    info = ServerCommandInfoDataControl().take(server)
+                    server_info = ServerInfoDataControl().take(server)
 
-                    if info.protocol == Protocol.CLI:
+                    logger.debug(f'check if server is alive, before switching power status: {server_info.server_name}')
+                    res = requests.get(server_info.survival_check)
+                    if res.status_code == 200:
+                        logger.debug(f'{server_info.server_name} is alive')
+                        ServerPowerStatusInfoDataControl().add(server,
+                                    ServerPowerStatusInfo(server_name=server, power_status=PowerStatus.STARTED))
+                        
+                    else:
+                        logger.debug(f'{server_info.server_name} is dead')
+                        ServerPowerStatusInfoDataControl().add(server, 
+                                    ServerPowerStatusInfo(server_name=server, power_status=PowerStatus.STOPPED))
+
+                    if info.protocol.value == Protocol.CLI.value:
                         switch_command: str = ''
                         progressive: PowerStatus
                         perfect: PowerStatus
@@ -62,8 +59,8 @@ class ServiceMessageConsumer(KafkaMessageConsumer):
                             logger.debug(f'command {command} is not supported')
                             continue
                         
-                        prev_status = ServerPowerStatusInfoDataControl.get_server_power_status_info(server)
-                        ServerPowerStatusInfoDataControl.set_server_power_status_info(server, 
+                        prev_status = ServerPowerStatusInfoDataControl().take(server)
+                        ServerPowerStatusInfoDataControl().add(server,
                                     ServerPowerStatusInfo(server_name=server, power_status=progressive))
                         try:
                             await request_to_proceed_commend_on_cli( 
@@ -72,9 +69,9 @@ class ServiceMessageConsumer(KafkaMessageConsumer):
                                             wrapUpFn=None)
                         except:
                             logger.exception('error occurred while executing command')
-                            ServerPowerStatusInfoDataControl.set_server_power_status_info(server, prev_status)
+                            ServerPowerStatusInfoDataControl().add(server, prev_status)
                             
-                        ServerPowerStatusInfoDataControl.set_server_power_status_info(server, 
+                        ServerPowerStatusInfoDataControl().add(server, 
                                     ServerPowerStatusInfo(server_name=server, power_status=perfect))
                         logger.debug(sentence)
                     else:

@@ -9,4 +9,4 @@ class VideoInfo(Model):
         return hash((self.project_name, self.description, self.video_link))
     
     def get_name():
-        return 'video_info'
+        return 'video_info_2'

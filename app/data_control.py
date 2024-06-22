@@ -35,43 +35,53 @@ class RedisDataControl(Generic[T], metaclass=Singleton):
                     pass
 
     def __init__(self) -> None:
-       if self.model_class:
-            print(self.model_class.get_name())
+       self.key = self.model_class.get_name()
 
-    def take_datas(self) -> set[T]:
-        raw_sets = __redis__.smembers(self.model_class.get_name())
-        datas = set[T]()
-        for raw in raw_sets:
-            datas.add(self.model_class.model_validate_json(raw))
+    def __get_name(self, name: str) -> str:
+        return self.key + ':' + name
+
+    def take_all(self) -> list[T]:
+        names = self.get_names()
+        datas = list[T]()
+        for name in names:
+            data = self.take(name)
+            if data is None:
+                logger.debug('data is None for ' + name)
+                continue
+            datas.append(data)
         return datas
 
-    def add(self, info: T):
-        __redis__.sadd(self.model_class.get_name(), info.model_dump_json())
+    def take(self, name: str) -> T | None:
+        raw = __redis__.get(self.__get_name(name))
+        if raw is None:
+            logger.debug('raw is None for ' + self.__get_name(name))
+            return None
+        return self.model_class.model_validate_json(raw)
+
+    def get_names(self) -> list[str]:
+        raw_sets = __redis__.zrange(self.key, 0, -1)
+        datas = list[str]()
+        for raw in raw_sets:
+            datas.append(raw.decode('utf-8'))
+        return datas
+
+    def add(self, name: str, info: T):
+        max = __redis__.zrevrange(self.key, 0, -1, withscores=True)
+        if len(max) == 0: max = 0
+        else            : max = max[0][1]
+        logger.debug('calcuated highest number ' + str(max))
         
-    def remove(self, info: T):
-        __redis__.srem(self.model_class.get_name(), info.model_dump_json())
+        key_name = self.__get_name(name)
+        __redis__.zadd(self.key, {name: max + 1}, nx=True)
+        __redis__.set(key_name, info.model_dump_json())
+        logger.debug(f'set to ({max}): {key_name}')
+        
+    def remove(self, name: str):
+        __redis__.zrem(self.key, name)
+        __redis__.delete(self.__get_name(name))
+        
 
 class VideoInfoDataControl(RedisDataControl[VideoInfo]): pass
 class ServerInfoDataControl(RedisDataControl[ServerInfo]): pass
-
-class ServerCommandInfoDataControl:
-    def get_server_command_info(server_name: str) -> ServerCommandInfo:
-        raw = __redis__.get(f'server_command_info:{server_name}')
-        return ServerCommandInfo.model_validate_json(raw)
-
-    def set_server_command_info(server_name: str, info: ServerCommandInfo):
-        __redis__.set(f'server_command_info:{server_name}', info.model_dump_json())
-        
-    def remove_server_info(server_name: str):
-        __redis__.delete(f'server_command_info:{server_name}')
-        
-class ServerPowerStatusInfoDataControl:
-    def get_server_power_status_info(server_name: str) -> ServerPowerStatusInfo:
-        raw = __redis__.get(f'server_power_status_info:{server_name}')
-        return ServerPowerStatusInfo.model_validate_json(raw)
-
-    def set_server_power_status_info(server_name: str, info: ServerPowerStatusInfo):
-        __redis__.set(f'server_power_status_info:{server_name}', info.model_dump_json())
-        
-    def remove_server_info(server_name: str):
-        __redis__.delete(f'server_power_status_info:{server_name}')
+class ServerCommandInfoDataControl(RedisDataControl[ServerCommandInfo]): pass
+class ServerPowerStatusInfoDataControl(RedisDataControl[ServerPowerStatusInfo]): pass

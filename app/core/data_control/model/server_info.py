@@ -8,4 +8,4 @@ class ServerInfo(Model):
         return hash((self.server_name, self.survival_check))
     
     def get_name():
-        return 'server_info'
+        return 'server_info_2'
