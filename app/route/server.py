@@ -6,7 +6,7 @@ from fastapi import APIRouter,       \
 from route.login import get_current_user
 from types import SimpleNamespace
 from data_control import ServerCommandInfoDataControl, ServerPowerStatusInfoDataControl
-from server_command_info import Protocol
+from app.core.data_control.model.server_command_info import Protocol
 from service.server_cli import request_to_proceed_commend_on_cli
 from service.service_message_producer import ServiceMessageProducer
 

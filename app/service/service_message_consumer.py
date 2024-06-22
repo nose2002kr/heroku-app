@@ -1,11 +1,10 @@
 from data_control import ServerCommandInfoDataControl, ServerInfoDataControl
 from service.server_cli import request_to_proceed_commend_on_cli
-from server_command_info import Protocol
+from app.core.data_control.model.server_command_info import Protocol
 from loguru import logger
 from service.kafka_interface.kafka_message_consumer import KafkaMessageConsumer
 from data_control import ServerPowerStatusInfoDataControl
-from server_info import ServerInfo
-from server_power_status_info import ServerPowerStatusInfo, PowerStatus
+from app.core.data_control.model.server_power_status_info import ServerPowerStatusInfo, PowerStatus
 import requests
 
 class ServiceMessageConsumer(KafkaMessageConsumer):
@@ -27,7 +26,7 @@ class ServiceMessageConsumer(KafkaMessageConsumer):
                     logger.debug(f"consumed: {server} {command}")
 
                     info = ServerCommandInfoDataControl.get_server_command_info(server)
-                    servers = ServerInfoDataControl.take_server_infos()
+                    servers = ServerInfoDataControl().take_datas()
                     for server_info in servers:
                         if server_info.server_name != server:
                             continue

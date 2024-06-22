@@ -2,7 +2,7 @@ from fastapi import APIRouter,       \
                     Depends
 
 from route.login import get_current_user
-from video_info import VideoInfo
+from app.core.data_control.model.video_info import VideoInfo
 from data_control import VideoInfoDataControl
 from fastapi.responses import JSONResponse
 
@@ -14,16 +14,16 @@ OK_RESULT_RESPONSE_EXAMPLE = {200:{"content":
 
 @video_router.get("/", response_model=set[VideoInfo])
 async def get_video_infos():
-    return VideoInfoDataControl.take_video_infos()
+    return VideoInfoDataControl().get_names()
 
 @video_router.post("/", response_model=None, dependencies=[Depends(get_current_user)],
                    responses=OK_RESULT_RESPONSE_EXAMPLE)
 async def add_video_info(info: VideoInfo):
-    VideoInfoDataControl.add_video_info(info)
+    VideoInfoDataControl().add(info)
     return JSONResponse(OK_RESULT)
 
 @video_router.delete("/", response_model=None, dependencies=[Depends(get_current_user)], 
                      responses=OK_RESULT_RESPONSE_EXAMPLE)
 async def delete_video_info(info: VideoInfo):
-    VideoInfoDataControl.remove_video_info(info)
+    VideoInfoDataControl().remove(info)
     return JSONResponse(OK_RESULT)
