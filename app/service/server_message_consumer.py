@@ -10,7 +10,7 @@ from app.core.data_control.model.server_command_info import ServerCommandInfo
 
 import aiohttp
 
-class ServiceMessageConsumer(KafkaMessageConsumer):
+class ServerMessageConsumer(KafkaMessageConsumer):
     def __init__(self):
         super().__init__('server')
 

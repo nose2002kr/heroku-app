@@ -8,7 +8,7 @@ from types import SimpleNamespace
 from app.core.data_control import ServerCommandInfoDataControl, ServerPowerStatusInfoDataControl
 from app.core.data_control.model.server_command_info import Protocol
 from service.server_cli import request_to_proceed_commend_on_cli
-from service.service_message_producer import ServiceMessageProducer
+from app.service.server_message_producer import ServerMessageProducer
 
 from config import Config
 from loguru import logger
@@ -67,12 +67,12 @@ async def run_to_server(websocket: WebSocket, server_name: str):
 
 @server_router.post("/{server_name}/turn_off", response_model=None)
 async def turn_off_server(server_name: str):
-    await ServiceMessageProducer().send(f"{server_name}:turn_off")
+    await ServerMessageProducer().send(f"{server_name}:turn_off")
     return OK_RESULT
 
 @server_router.post("/{server_name}/turn_on", response_model=None, dependencies=[Depends(get_current_user)])
 async def turn_on_server(server_name: str):
-    await ServiceMessageProducer().send(f"{server_name}:turn_on")
+    await ServerMessageProducer().send(f"{server_name}:turn_on")
     return OK_RESULT
 
 @server_router.get("/{server_name}/status", response_model=None, dependencies=[Depends(get_current_user)])

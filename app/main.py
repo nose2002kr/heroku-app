@@ -12,14 +12,14 @@ from route.video import video_router
 from route.servers import servers_router
 from route.server import server_router
 
-from service.service_message_consumer import ServiceMessageConsumer
+from app.service.server_message_consumer import ServerMessageConsumer
 from config import Config
 
 import asyncio
 
 @asynccontextmanager
 async def startup_event(app: FastAPI):
-    asyncio.create_task(ServiceMessageConsumer().consume())
+    asyncio.create_task(ServerMessageConsumer().consume())
     yield
 
 
