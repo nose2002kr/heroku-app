@@ -65,7 +65,7 @@ async def run_to_server(websocket: WebSocket, server_name: str):
         logger.exception('Unexpected error', e)
         await websocket.close(code=1008)
 
-@server_router.post("/{server_name}/turn_off", response_model=None)
+@server_router.post("/{server_name}/turn_off", response_model=None, dependencies=[Depends(get_current_user)])
 async def turn_off_server(server_name: str):
     await ServerMessageProducer().send(f"{server_name}:turn_off")
     return OK_RESULT
