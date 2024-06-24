@@ -7,6 +7,7 @@ from app.core.data_control import ServerPowerStatusInfoDataControl
 from app.core.data_control.model.server_power_status_info import ServerPowerStatusInfo, PowerStatus
 from app.core.data_control.model.server_info import ServerInfo
 from app.core.data_control.model.server_command_info import ServerCommandInfo
+from datetime import datetime
 
 import aiohttp
 
@@ -16,6 +17,7 @@ class ServerMessageConsumer(KafkaMessageConsumer):
 
     async def __check_server(self, server_info: ServerInfo):
         async with aiohttp.ClientSession() as session:
+            logger.debug(server_info.survival_check)
             async with session.get(server_info.survival_check) as response:
                 if response.status == 200:
                     self.notify_started(server_info.server_name, 'is alive')
@@ -25,7 +27,7 @@ class ServerMessageConsumer(KafkaMessageConsumer):
     def notify_status(self, server_name: str, status: PowerStatus, modifier: str = None):
         logger.debug(f'{server_name} {modifier if modifier is not None else "is " + status.name.lower()}')
         ServerPowerStatusInfoDataControl().set(server_name,
-                        ServerPowerStatusInfo(server_name=server_name, power_status=status))
+                        ServerPowerStatusInfo(server_name=server_name, power_status=status, updated_at=datetime.now()))
 
     def notify_stopping(self, server_name: str, modifier: str = None): self.notify_status(server_name, PowerStatus.STOPPING, modifier)
     def notify_stopped (self, server_name: str, modifier: str = None): self.notify_status(server_name, PowerStatus.STOPPED , modifier)
@@ -44,7 +46,7 @@ class ServerMessageConsumer(KafkaMessageConsumer):
         else:
             logger.debug(f'command {command} is not supported')
             return None
-        return switch_command,notify_progressing, notify_done
+        return switch_command, notify_progressing, notify_done
 
     async def consume(self):
         try:

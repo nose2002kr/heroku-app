@@ -13,7 +13,6 @@ from route.servers import servers_router
 from route.server import server_router
 
 from app.service.server_message_consumer import ServerMessageConsumer
-from config import Config
 
 import asyncio
 

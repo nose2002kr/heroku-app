@@ -10,8 +10,8 @@ from app.core.data_control.model.server_command_info import Protocol
 from service.server_cli import request_to_proceed_commend_on_cli
 from app.service.server_message_producer import ServerMessageProducer
 
-from config import Config
 from loguru import logger
+from datetime import datetime
 
 server_router = APIRouter(prefix='/api/server')
 OK_RESULT = {"message": "OK"}
@@ -68,17 +68,18 @@ async def run_to_server(websocket: WebSocket, server_name: str):
 @server_router.post("/{server_name}/turn_off", response_model=None, dependencies=[Depends(get_current_user)])
 async def turn_off_server(server_name: str):
     await ServerMessageProducer().send(f"{server_name}:turn_off")
-    return OK_RESULT
+    return OK_RESULT | {'requested_at': datetime.now().timestamp()}
 
 @server_router.post("/{server_name}/turn_on", response_model=None, dependencies=[Depends(get_current_user)])
 async def turn_on_server(server_name: str):
     await ServerMessageProducer().send(f"{server_name}:turn_on")
-    return OK_RESULT
+    return OK_RESULT | {'requested_at': datetime.now().timestamp()}
 
 @server_router.get("/{server_name}/status", response_model=None, dependencies=[Depends(get_current_user)])
 async def status_power_of_the_server(server_name: str):
     server_status = ServerPowerStatusInfoDataControl().take(server_name)
     return {
         "server_name": server_status.server_name,
-        "power_status": server_status.power_status.name
+        "power_status": server_status.power_status.name,
+        "updated_at": server_status.updated_at.timestamp()
     }
