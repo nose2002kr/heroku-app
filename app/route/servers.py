@@ -3,7 +3,7 @@ from fastapi import APIRouter,       \
 
 from route.login import get_current_user
 from app.core.data_control.model.server_info import ServerInfo
-from data_control import ServerInfoDataControl
+from app.core.data_control import ServerInfoDataControl
 from fastapi.responses import JSONResponse
 
 servers_router = APIRouter(prefix='/api/servers')

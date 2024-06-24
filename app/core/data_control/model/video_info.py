@@ -1,4 +1,4 @@
-from core.data_control.model.model import Model
+from core.data_control.model import Model
 
 class VideoInfo(Model):
     project_name: str

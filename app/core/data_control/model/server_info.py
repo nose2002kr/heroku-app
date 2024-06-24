@@ -1,4 +1,4 @@
-from core.data_control.model.model import Model
+from core.data_control.model import Model
 
 class ServerInfo(Model):
     server_name: str

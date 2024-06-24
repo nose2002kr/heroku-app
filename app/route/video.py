@@ -3,7 +3,7 @@ from fastapi import APIRouter,       \
 
 from route.login import get_current_user
 from app.core.data_control.model.video_info import VideoInfo
-from data_control import VideoInfoDataControl
+from app.core.data_control import VideoInfoDataControl
 from fastapi.responses import JSONResponse
 
 video_router = APIRouter(prefix='/api/video')

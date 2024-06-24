@@ -2,7 +2,7 @@ import redis
 from config import Config
 from pydantic import ValidationError
 
-from core.data_control.model.model import Model
+from core.data_control.model import Model
 from core.data_control.model.video_info import VideoInfo
 from core.data_control.model.server_info import ServerInfo
 from core.data_control.model.server_command_info import ServerCommandInfo
