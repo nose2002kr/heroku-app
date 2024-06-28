@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     redis_port: str
     redis_pwd: str
     kafka_host: str
+    github_username: str
+    github_token: str
+
 
     model_config = None
     if is_production:
@@ -23,6 +26,8 @@ class Settings(BaseSettings):
         redis_port = os.environ['REDISCLOUD_PORT']
         redis_pwd = os.environ['REDISCLOUD_PWD']
         kafka_host = os.environ['KAFKA_HOST']
+        github_username = os.environ['GITHUB_USERNAME']
+        github_token = os.environ['GITHUB_TOKEN']
     else:
         model_config = SettingsConfigDict(env_file='.env')
          
