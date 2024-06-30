@@ -4,6 +4,7 @@ import math
 
 class SVGMaker:
     def get_base_svg(self, lang):
+        lang = lang.lower().replace('#', 'sharp').replace('+', 'plus')
         response = requests.get(f'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/{lang}/{lang}-original.svg')
         response.raise_for_status()
         return response.text

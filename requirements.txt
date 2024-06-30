@@ -18,3 +18,10 @@ attrs==23.2.0
 frozenlist==1.4.1
 multidict==6.0.5
 yarl==1.9.4
+fastapi-cache2==0.2.1
+pendulum==3.0.0
+python-dateutil==2.9.0.post0
+redis==4.6.0
+six==1.16.0
+time-machine==2.14.2
+tzdata==2024.1
