@@ -1,12 +1,19 @@
 import requests
 from lxml import etree
 import math
+from fastapi_cache.decorator import cache
+from app.core.singleton import Singleton
+from loguru import logger
 
-class SVGMaker:
-    def get_base_svg(self, lang):
+class SVGMaker(metaclass=Singleton):
+    
+    @cache(expire=3600)
+    async def get_base_svg(self, lang):
+        logger.debug(f'Getting base svg for {lang}')
         lang = lang.lower().replace('#', 'sharp').replace('+', 'plus')
         response = requests.get(f'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/{lang}/{lang}-original.svg')
         response.raise_for_status()
+        logger.debug(f'Got base svg for {lang} {response.text[:30]}')
         return response.text
     
     def make_mask_svg(self, w, h):
@@ -35,8 +42,8 @@ class SVGMaker:
         
         return mask
 
-    def make_clock_wipe_transition(self, lang):
-        raw_base_svg = self.get_base_svg(lang)
+    async def make_clock_wipe_transition(self, lang):
+        raw_base_svg = await self.get_base_svg(lang)
         base_svg = etree.fromstring(raw_base_svg)
         
         x, y, w, h = base_svg.get('viewBox').split(' ')

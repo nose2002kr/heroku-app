@@ -19,5 +19,5 @@ async def get_top3():
 async def get_svg_of_top_lang():
     langs = await GithubAPI().get_used_language_count()
     first_key = next(iter(langs.keys()))
-    svg = SVGMaker().make_clock_wipe_transition(first_key)
+    svg = await SVGMaker().make_clock_wipe_transition(first_key)
     return Response(content=svg, media_type="application/svg+xml")
