@@ -21,3 +21,8 @@ async def get_svg_of_top_lang():
     first_key = next(iter(langs.keys()))
     svg = await SVGMaker().make_clock_wipe_transition(first_key)
     return Response(content=svg, media_type="application/svg+xml")
+
+@github_rank_router.get("/{lang}/svg", response_model=None)
+async def get_svg_of_specific_lang(lang: str):
+    svg = await SVGMaker().make_clock_wipe_transition(lang)
+    return Response(content=svg, media_type="application/svg+xml")
