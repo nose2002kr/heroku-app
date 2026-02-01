@@ -15,8 +15,10 @@ from route.video import video_router
 from route.servers import servers_router
 from route.server import server_router
 from route.github_rank import github_rank_router
+from route.video_edit import video_edit_router
 
 from app.service.server_message_consumer import ServerMessageConsumer
+from loguru import logger
 
 import asyncio
 from app.config import Config
@@ -24,7 +26,9 @@ from app.config import Config
 @asynccontextmanager
 async def startup_event(app: FastAPI):
     asyncio.create_task(ServerMessageConsumer().consume())
-    redis = aioredis.from_url('redis://default:' + Config.redis_pwd + '@' + Config.redis_host + ':' + Config.redis_port)
+    redis_url = 'redis://default:' + Config.redis_pwd + '@' + Config.redis_host + ':' + Config.redis_port
+    logger.debug(f'redis will connect: {redis_url}')
+    redis = aioredis.from_url(redis_url)
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     yield
 
@@ -33,6 +37,7 @@ app = FastAPI(lifespan=startup_event)
 
 origins = [
     "http://localhost:3000",
+    "http://localhost:5173",
     "https://nose2002kr.github.io",
 ]
 app.add_middleware(
@@ -48,4 +53,5 @@ app.include_router(router=video_router)
 app.include_router(router=server_router)
 app.include_router(router=servers_router)
 app.include_router(router=github_rank_router)
+app.include_router(router=video_edit_router)
 
